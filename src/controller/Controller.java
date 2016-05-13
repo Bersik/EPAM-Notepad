@@ -1,6 +1,6 @@
 package controller;
 
-import constants.Regexp;
+import constants.Regex;
 import entity.Address;
 import entity.Group;
 import entity.Note;
@@ -34,6 +34,7 @@ public class Controller {
 
         view.printMessage(View.HELLO_MESSAGE);
         while (true) {
+            view.printLine();
             view.printMessage(View.MAIN_MENU);
             Note note;
             menuItem = inputIntValue(sc);
@@ -63,7 +64,7 @@ public class Controller {
                                     view.printMessage(note.getAddress().getPostAddress());
                                     break;
                                 case 4:
-                                    //TODO note update
+                                    updateNote(sc, note);
                                     break;
                                 case 5:
                                     break subMenu;
@@ -103,16 +104,16 @@ public class Controller {
      */
     private Note readNote(Scanner sc) {
         Note note = new Note();
-        note.setSurName(inputStringWithPattern(sc, Regexp.NAME_REGEXP, View.SURNAME));
-        note.setName(inputStringWithPattern(sc, Regexp.NAME_REGEXP, View.NAME));
-        note.setPatronymic(inputStringWithPattern(sc, Regexp.NAME_REGEXP, View.PATRONYMIC));
-        note.setNickName(inputStringWithPattern(sc, Regexp.NICKNAME_REGEXP, View.NICKNAME));
-        note.setComment(inputStringWithPattern(sc, Regexp.COMMENT_REGEXP, View.COMMENT, true));
+        note.setSurName(inputStringWithPattern(sc, Regex.NAME_REGEX, View.SURNAME));
+        note.setName(inputStringWithPattern(sc, Regex.NAME_REGEX, View.NAME));
+        note.setPatronymic(inputStringWithPattern(sc, Regex.NAME_REGEX, View.PATRONYMIC));
+        note.setNickName(inputStringWithPattern(sc, Regex.NICKNAME_REGEX, View.NICKNAME));
+        note.setComment(inputStringWithPattern(sc, Regex.COMMENT_REGEX, View.COMMENT, true));
         note.setGroup(inputGroup(sc));
-        note.setHomePhone(inputStringWithPattern(sc, Regexp.HOME_NUMBER_REGEXP, View.HOME_PHONE));
-        note.setMobilePhone(inputStringWithPattern(sc, Regexp.MOBILE_NUMBER_REGEXP, View.MOBILE_PHONE));
-        note.setEmail(inputStringWithPattern(sc, Regexp.EMAIL_REGEXP, View.EMAIL));
-        note.setSkype(inputStringWithPattern(sc, Regexp.SKYPE_REGEXP, View.SKYPE));
+        note.setHomePhone(inputStringWithPattern(sc, Regex.HOME_NUMBER_REGEX, View.HOME_PHONE));
+        note.setMobilePhone(inputStringWithPattern(sc, Regex.MOBILE_NUMBER_REGEX, View.MOBILE_PHONE));
+        note.setEmail(inputStringWithPattern(sc, Regex.EMAIL_REGEX, View.EMAIL));
+        note.setSkype(inputStringWithPattern(sc, Regex.SKYPE_REGEX, View.SKYPE));
 
         view.printMessage(View.ADDRESS_INPUT_MESSAGE);
         note.setAddress(inputAddress(sc));
@@ -123,6 +124,31 @@ public class Controller {
         return note;
     }
 
+
+    /**
+     * Read new note field from console
+     *
+     * @param sc   instance of Scanner
+     * @param note instance of note
+     */
+    private void updateNote(Scanner sc, Note note) {
+        note.setSurName(updateField(sc, note.getSurName(), Regex.NAME_REGEX, View.SURNAME));
+        note.setName(updateField(sc, note.getName(), Regex.NAME_REGEX, View.NAME));
+        note.setPatronymic(updateField(sc, note.getPatronymic(), Regex.NAME_REGEX, View.PATRONYMIC));
+        note.setNickName(updateField(sc, note.getNickName(), Regex.NICKNAME_REGEX, View.NICKNAME));
+        note.setComment(updateField(sc, note.getComment(), Regex.COMMENT_REGEX, View.COMMENT, true));
+        note.setGroup(inputGroup(sc));
+        note.setHomePhone(updateField(sc, note.getHomePhone(), Regex.HOME_NUMBER_REGEX, View.HOME_PHONE));
+        note.setMobilePhone(updateField(sc, note.getMobilePhone(), Regex.MOBILE_NUMBER_REGEX, View.MOBILE_PHONE));
+        note.setEmail(updateField(sc, note.getEmail(), Regex.EMAIL_REGEX, View.EMAIL));
+        note.setSkype(updateField(sc, note.getSkype(), Regex.SKYPE_REGEX, View.SKYPE));
+
+        view.printMessage(View.ADDRESS_INPUT_MESSAGE);
+        updateAddress(sc, note.getAddress());
+
+        note.setLastModifiedDate(new Date());
+    }
+
     /**
      * Looking note in notepad
      *
@@ -130,7 +156,7 @@ public class Controller {
      * @return found Note
      */
     private Note searchNote(Scanner sc) {
-        String fullName = inputStringWithPattern(sc, Regexp.SEARCH_FULL_NAME_REGEXP, View.FULL_NAME);
+        String fullName = inputStringWithPattern(sc, Regex.SEARCH_FULL_NAME_REGEX, View.FULL_NAME);
         List<Note> notes = notebook.findNotesByFullName(fullName);
 
         if (notes.isEmpty()) {
@@ -147,6 +173,27 @@ public class Controller {
         }
         int id = inputIntValueInRange(sc, 1, notes.size()) - 1;
         return notes.get(id);
+    }
+
+    /**
+     * Read text line from console satisfying pattern
+     *
+     * @param sc      instance of Scanner
+     * @param pattern regexp
+     * @param field   name of field
+     * @return text line
+     */
+    private String inputStringWithPattern(Scanner sc, String pattern, String field) {
+        String line;
+        while (true) {
+            view.printField(field);
+            line = sc.nextLine();
+            if (line.matches(pattern))
+                return line;
+            else {
+                view.printMessage(View.INPUT_ERROR);
+            }
+        }
     }
 
     /**
@@ -178,18 +225,22 @@ public class Controller {
     }
 
     /**
-     * Read text line from console satisfying pattern
+     * Read text line from console satisfying pattern and update it, if line is not empty
      *
-     * @param sc      instance of Scanner
-     * @param pattern regexp
-     * @param field   name of field
-     * @return text line
+     * @param sc         instance of Scanner
+     * @param fieldValue field value
+     * @param pattern    regexp
+     * @param field      name of field
+     * @return new value (or last, if {@code line} was empty)
      */
-    private String inputStringWithPattern(Scanner sc, String pattern, String field) {
+    private String updateField(Scanner sc, String fieldValue, String pattern, String field) {
         String line;
         while (true) {
-            view.printField(field);
+            view.printField(field, fieldValue);
             line = sc.nextLine();
+            if (line.isEmpty()) {
+                return fieldValue;
+            }
             if (line.matches(pattern))
                 return line;
             else {
@@ -199,6 +250,36 @@ public class Controller {
     }
 
     /**
+     * Read text line from console satisfying pattern and update it, if line is not empty
+     *
+     * @param sc         instance of Scanner
+     * @param fieldValue field value
+     * @param pattern    regexp
+     * @param field      name of field
+     * @param empty      indicates whether the field be empty
+     * @return new value (or last, if {@code line} was empty)
+     */
+    private String updateField(Scanner sc, String fieldValue, String pattern, String field, boolean empty) {
+        if (!empty)
+            return inputStringWithPattern(sc, pattern, field);
+        String line;
+        while (true) {
+            view.printField(field, fieldValue);
+            if (sc.hasNextLine()) {
+                line = sc.nextLine();
+                if (line.matches(pattern)) {
+                    return line;
+                } else {
+                    view.printMessage(View.INPUT_ERROR);
+                }
+            } else {
+                return fieldValue;
+            }
+        }
+    }
+
+
+    /**
      * Read address from scanner
      *
      * @param sc instance of Scanner
@@ -206,12 +287,26 @@ public class Controller {
      */
     private Address inputAddress(Scanner sc) {
         Address address = new Address();
-        address.setZip(inputStringWithPattern(sc, Regexp.ZIP_REGEXP, View.ZIP));
-        address.setCity(inputStringWithPattern(sc, Regexp.CITY_REGEXP, View.CITY));
-        address.setStreet(inputStringWithPattern(sc, Regexp.STREET_REGEXP, View.STREET));
-        address.setBuilding(inputStringWithPattern(sc, Regexp.BUILDING_REGEXP, View.BUILDING));
-        address.setApartment(inputStringWithPattern(sc, Regexp.APARTMENT_REGEXP, View.APARTMENT));
+        address.setZip(inputStringWithPattern(sc, Regex.ZIP_REGEX, View.ZIP));
+        address.setCity(inputStringWithPattern(sc, Regex.CITY_REGEX, View.CITY));
+        address.setStreet(inputStringWithPattern(sc, Regex.STREET_REGEX, View.STREET));
+        address.setBuilding(inputStringWithPattern(sc, Regex.BUILDING_REGEX, View.BUILDING));
+        address.setApartment(inputStringWithPattern(sc, Regex.APARTMENT_REGEX, View.APARTMENT));
         return address;
+    }
+
+    /**
+     * Update address; read field values from scanner
+     *
+     * @param sc      instance of Scanner
+     * @param address address
+     */
+    private void updateAddress(Scanner sc, Address address) {
+        address.setZip(updateField(sc, address.getZip(), Regex.ZIP_REGEX, View.ZIP));
+        address.setCity(updateField(sc, address.getCity(), Regex.CITY_REGEX, View.CITY));
+        address.setStreet(updateField(sc, address.getStreet(), Regex.STREET_REGEX, View.STREET));
+        address.setBuilding(updateField(sc, address.getBuilding(), Regex.BUILDING_REGEX, View.BUILDING));
+        address.setApartment(updateField(sc, address.getApartment(), Regex.APARTMENT_REGEX, View.APARTMENT));
     }
 
     /**
@@ -282,8 +377,8 @@ public class Controller {
      * @param notes notes
      */
     private void printNotebook(List<Note> notes) {
-        for (Note note : notes) {
-            view.printMessage(note.toString());
+        for (int i = 0; i < notes.size(); i++) {
+            view.printItemInList(i + 1, notes.get(i).toString());
         }
     }
 

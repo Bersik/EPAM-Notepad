@@ -158,20 +158,18 @@ public class Note {
 
     @Override
     public String toString() {
-        return "Note{" +
-                "surName='" + surName + '\'' +
-                ", name='" + name + '\'' +
-                ", patronymic='" + patronymic + '\'' +
-                ", nickName='" + nickName + '\'' +
-                ", comment='" + comment + '\'' +
-                ", group=" + group +
-                ", homePhone='" + homePhone + '\'' +
-                ", mobilePhone='" + mobilePhone + '\'' +
-                ", email='" + email + '\'' +
-                ", skype='" + skype + '\'' +
-                ", address=" + address +
-                ", createdDate=" + createdDate +
-                ", lastModifiedDate=" + lastModifiedDate +
-                '}';
+        return getFullName() +
+                "\n\tName: " + name +
+                "\n\tSurname: " + surName +
+                "\n\tPatronymic: " + patronymic +
+                "\n\tComment: " + comment +
+                "\n\tGroup: " + group +
+                "\n\tHome phone number: " + homePhone +
+                "\n\tMobile phone number: " + mobilePhone +
+                "\n\tEmail: " + email +
+                "\n\tSkype: " + skype +
+                "\n\tAddress: " + address +
+                "\n\tCreated date: " + createdDate +
+                "\n\tLast modified date: " + lastModifiedDate;
     }
 }

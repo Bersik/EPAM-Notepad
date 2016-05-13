@@ -19,8 +19,8 @@ public class View {
     public static final String WRONG_MENU_ITEM = "Wrong menu item!";
     public static final String EMPTY_NOTEPAD = "Notepad is empty!";
     public static final String SEARCH_ERROR = "Notepad does not contain notes with that name";
-    public static final String INPUT_ERROR= "Incorrect input. Repeat please!";
-    public static final String WRONG_NUMBER_MESSAGE= "Wrong number! Number should be in range [%d;%d]. Repeat please!";
+    public static final String INPUT_ERROR = "Incorrect input. Repeat please!";
+    public static final String WRONG_NUMBER_MESSAGE = "Wrong number! Number should be in range [%d;%d]. Repeat please!";
 
     public static final String SURNAME = "Surname";
     public static final String NAME = "Name";
@@ -39,6 +39,8 @@ public class View {
     public static final String BUILDING = "Building";
     public static final String APARTMENT = "Apartment";
 
+    public static final String DATE_FORMAT = "";
+
 
     public static final String EMPTY_LIST = "";
     public static final String SELECT_NOTE = "";
@@ -48,8 +50,12 @@ public class View {
         System.out.println(message);
     }
 
-    public void printField(String message) {
-        System.out.print(message + ": ");
+    public void printField(String field) {
+        System.out.print(field + ": ");
+    }
+
+    public void printField(String field, String fieldValue) {
+        System.out.print(field + "(" + fieldValue + "): ");
     }
 
     public void formatMessage(String message, Object... args) {
